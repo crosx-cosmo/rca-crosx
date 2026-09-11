@@ -17,8 +17,12 @@ export function toCsv(results: RedirectAnalysis[]): string {
     "protocol",
     "status",
     "status_text",
+    "mechanism",
+    "mechanism_detail",
     "redirect_type",
     "response_time_ms",
+    "next_url",
+    "blocked_reason",
     "location",
     "server",
     "ip",
@@ -32,8 +36,12 @@ export function toCsv(results: RedirectAnalysis[]): string {
         hop.protocol,
         hop.status,
         hop.statusText,
+        hop.mechanismLabel ?? "",
+        hop.mechanismDetail ?? "",
         hop.redirectType,
         hop.responseTimeMs,
+        hop.nextUrl ?? "",
+        hop.blockedReason ?? "",
         hop.location ?? "",
         hop.server ?? "",
         hop.ip ?? "",
@@ -60,11 +68,16 @@ export function toReport(results: RedirectAnalysis[]): string {
         `Final status: ${result.finalStatus ?? "n/a"}`,
         `Final URL: ${result.finalUrl}`,
         `Redirect loop: ${result.redirectLoop ? "Yes" : "No"}`,
+        `Final destination confirmed: ${result.finalDestinationConfirmed === false ? "No" : "Yes"}`,
+        `Trace ended: ${result.terminationReason ?? "final-response"}${result.terminationDetail ? ` — ${result.terminationDetail}` : ""}`,
         "",
         "Hops:",
         ...result.hops.map(
           (hop) =>
-            `  ${hop.index + 1}. [${hop.status} ${hop.redirectType}] ${hop.url} (${hop.responseTimeMs} ms, ${hop.protocol.toUpperCase()}${hop.server ? `, ${hop.server}` : ""})${hop.location ? `\n     Location: ${hop.location}` : ""}`,
+            `  ${hop.index + 1}. [${hop.status || "—"} ${hop.mechanismLabel ?? hop.redirectType}] ${hop.url} (${hop.responseTimeMs} ms, ${hop.protocol.toUpperCase()}${hop.server ? `, ${hop.server}` : ""})` +
+            (hop.mechanismDetail ? `\n     Mechanism: ${hop.mechanismDetail}` : "") +
+            (hop.nextUrl ?? hop.location ? `\n     Destination: ${hop.nextUrl ?? hop.location}` : "") +
+            (hop.blockedReason ? `\n     Not followed: ${hop.blockedReason}` : ""),
         ),
         "",
         "SEO:",

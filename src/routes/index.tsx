@@ -18,9 +18,9 @@ import { analysisKey, type ShareIdMap } from "@/lib/analysis-store";
 import { activeBackend, analyzeUrls, demoAnalysis } from "@/lib/redirect-service";
 import type { RedirectAnalysis } from "@/lib/redirect-types";
 
-const TITLE = "Redirect Chain Analyzer — Trace Every HTTP Hop";
+const TITLE = "Redirect & URL Trace Engine — Every Hop, HTTP or JavaScript";
 const DESCRIPTION =
-  "Analyze redirect chains hop by hop: status codes, timings, Location headers, HTTPS downgrades, loops and affiliate tracking parameter loss.";
+  "Trace any URL end to end: HTTP 301/302/307/308 redirects, meta refresh, JavaScript navigation, cloaked affiliate hops, loops, dead ends and tracking parameter loss.";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -79,7 +79,7 @@ function AnalyzerPage() {
               Redirect Chain Analyzer
             </h1>
             <p className="hidden truncate text-[11px] leading-tight text-muted-foreground sm:block">
-              Hop-by-hop HTTP tracing for SEO and affiliate tracking
+              Universal redirect + URL tracing for SEO and affiliate links
             </p>
           </div>
           <div className="flex shrink-0 items-center gap-2">
@@ -104,15 +104,16 @@ function AnalyzerPage() {
         <section className="animate-reveal">
           <span className="inline-flex items-center gap-1.5 rounded-full border border-hairline bg-surface/80 px-2.5 py-1 text-[10.5px] font-semibold uppercase tracking-[0.09em] text-muted-foreground shadow-soft">
             <span className="size-1.5 rounded-full bg-success" />
-            HTTP forensics
+            Redirect forensics
           </span>
           <h2 className="mt-3 text-[26px] font-semibold leading-[1.12] tracking-tight text-foreground sm:text-4xl">
             Trace every hop{" "}
             <span className="text-gradient-brand">before it costs you a conversion</span>
           </h2>
           <p className="mt-3 max-w-2xl text-sm leading-relaxed text-muted-foreground sm:text-[15px]">
-            Real HTTP requests are performed server-side — status codes, response times, Location
-            headers, protocol changes and query-parameter diffs for each redirect.
+            Real requests run server-side and follow every mechanism: HTTP redirects, meta refresh,
+            JavaScript navigation and cloaked affiliate hops — with status codes, timings, headers,
+            protocol changes and query-parameter diffs for each hop.
           </p>
         </section>
 
@@ -163,7 +164,7 @@ function AnalyzerPage() {
           : null}
 
         <footer className="border-t border-hairline pt-4 text-center font-mono text-[11px] text-muted-foreground">
-          Requests run server-side with a 20-hop limit and a 15 s per-hop timeout.
+          Requests run server-side behind SSRF protection, with a 20-hop limit, a 15 s per-hop timeout and a 55 s overall budget. Hops that cannot be safely followed are reported with the exact reason.
         </footer>
       </main>
     </div>

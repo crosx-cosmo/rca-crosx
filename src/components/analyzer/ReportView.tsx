@@ -1,4 +1,4 @@
-import { CalendarClock, Download, FileJson, FileText, Link2 } from "lucide-react";
+import { CalendarClock, Download, FileJson, FileText, Link2, TriangleAlert } from "lucide-react";
 import { toast } from "sonner";
 
 import {
@@ -131,8 +131,20 @@ export function ReportView({
           <p className="flex min-w-0 items-start gap-1.5 rounded-xl border border-hairline bg-surface/70 px-3 py-2 text-[11.5px] text-muted-foreground">
             <Link2 className="mt-0.5 size-3.5 shrink-0" />
             <span className="min-w-0">
-              Final destination:{" "}
+              {result.finalDestinationConfirmed === false
+                ? "Last URL reached (not confirmed as the final destination): "
+                : "Final destination: "}
               <span className="break-all font-mono text-foreground">{result.finalUrl}</span>
+            </span>
+          </p>
+        ) : null}
+
+        {result.finalDestinationConfirmed === false && result.terminationDetail ? (
+          <p className="flex min-w-0 items-start gap-1.5 rounded-xl border border-warning/35 bg-warning/10 px-3 py-2.5 text-[12px] text-warning-foreground">
+            <TriangleAlert className="mt-0.5 size-3.5 shrink-0" />
+            <span className="min-w-0">
+              <span className="font-semibold">Trace stopped early — </span>
+              {result.terminationDetail}
             </span>
           </p>
         ) : null}
@@ -142,6 +154,7 @@ export function ReportView({
             {result.error}
           </p>
         ) : null}
+
 
         <SummaryCards result={result} />
       </section>

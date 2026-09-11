@@ -1,24 +1,172 @@
+import { useMutation } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
+import { Activity, ShieldCheck } from "lucide-react";
 
-// No head() here: the home route inherits title/description/og/twitter from
-// __root.tsx, and ships no og:image so serve-time hosting can inject the
-// project's social preview (explicit og:image or latest screenshot).
+import markDark from "@/assets/crosx-mark-dark.png";
+import markLight from "@/assets/crosx-mark-light.png";
+import { useState } from "react";
+import { toast } from "sonner";
+
+import { ExportBar } from "@/components/analyzer/ExportBar";
+import { ReportView } from "@/components/analyzer/ReportView";
+import { EmptyState, ErrorState, LoadingState } from "@/components/analyzer/States";
+import { UrlInputPanel } from "@/components/analyzer/UrlInputPanel";
+import { ThemeToggle } from "@/components/ThemeToggle";
+import { Badge } from "@/components/ui/badge";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
+import { analysisKey, type ShareIdMap } from "@/lib/analysis-store";
+import { activeBackend, analyzeUrls, demoAnalysis } from "@/lib/redirect-service";
+import type { RedirectAnalysis } from "@/lib/redirect-types";
+
+const TITLE = "Redirect & URL Trace Engine — Every Hop, HTTP or JavaScript";
+const DESCRIPTION =
+  "Trace any URL end to end: HTTP 301/302/307/308 redirects, meta refresh, JavaScript navigation, cloaked affiliate hops, loops, dead ends and tracking parameter loss.";
+
 export const Route = createFileRoute("/")({
-  component: Index,
+  head: () => ({
+    meta: [
+      { title: TITLE },
+      { name: "description", content: DESCRIPTION },
+      { property: "og:title", content: TITLE },
+      { property: "og:description", content: DESCRIPTION },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary_large_image" },
+    ],
+  }),
+  component: AnalyzerPage,
 });
 
-// IMPORTANT: Replace this placeholder. See ./README.md for routing conventions.
-function Index() {
+function AnalyzerPage() {
+  const [results, setResults] = useState<RedirectAnalysis[]>([]);
+  const [shareIds, setShareIds] = useState<ShareIdMap>({});
+
+  const mutation = useMutation({
+    mutationFn: (urls: string[]) => analyzeUrls(urls),
+    onSuccess: ({ results: data, shareIds: ids }) => {
+      setResults(data);
+      setShareIds(ids);
+      toast.success(`Analyzed ${data.length} URL${data.length === 1 ? "" : "s"}`);
+    },
+    onError: (error: Error) => toast.error(error.message || "Analysis failed"),
+  });
+
   return (
-    <div
-      className="flex min-h-screen items-center justify-center"
-      style={{ backgroundColor: "#fcfbf8" }}
-    >
-      <img
-        data-lovable-blank-page-placeholder="REMOVE_THIS"
-        src="https://cdn.gpteng.co/blank-app-v1.svg"
-        alt="Your app will live here!"
-      />
+    <div className="bg-hero min-h-screen">
+      <header className="sticky top-0 z-30 border-b border-hairline bg-background/70 backdrop-blur-xl">
+        <div className="mx-auto flex max-w-5xl items-center gap-3 px-4 py-3 sm:gap-4 sm:px-6">
+          <a href="/" aria-label="CROSX home" className="flex shrink-0 items-center">
+            <img
+              src={markLight}
+              alt="CROSX Advertising & Marketing Agency"
+              width={1699}
+              height={545}
+              decoding="async"
+              className="h-5 w-auto dark:hidden sm:h-[22px]"
+            />
+            <img
+              src={markDark}
+              alt=""
+              aria-hidden="true"
+              width={1699}
+              height={545}
+              decoding="async"
+              className="hidden h-5 w-auto dark:block sm:h-[22px]"
+            />
+          </a>
+          <span aria-hidden="true" className="h-6 w-px shrink-0 bg-hairline" />
+          <div className="min-w-0 flex-1">
+            <h1 className="truncate text-[14.5px] font-semibold leading-tight tracking-tight text-foreground sm:text-[15.5px]">
+              Redirect Chain Analyzer
+            </h1>
+            <p className="hidden truncate text-[11px] leading-tight text-muted-foreground sm:block">
+              Universal redirect + URL tracing for SEO and affiliate links
+            </p>
+          </div>
+          <div className="flex shrink-0 items-center gap-2">
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Badge
+                  variant="outline"
+                  className="hidden gap-1.5 border-hairline bg-surface/80 py-1 font-medium text-muted-foreground sm:flex"
+                >
+                  <ShieldCheck className="size-3 text-success" />
+                  {activeBackend() === "external" ? "External API" : "Live server tracing"}
+                </Badge>
+              </TooltipTrigger>
+              <TooltipContent>Requests are performed server-side, never in the browser</TooltipContent>
+            </Tooltip>
+            <ThemeToggle />
+          </div>
+        </div>
+      </header>
+
+      <main className="mx-auto max-w-5xl space-y-5 px-4 py-7 sm:px-6 sm:py-10">
+        <section className="animate-reveal">
+          <span className="inline-flex items-center gap-1.5 rounded-full border border-hairline bg-surface/80 px-2.5 py-1 text-[10.5px] font-semibold uppercase tracking-[0.09em] text-muted-foreground shadow-soft">
+            <span className="size-1.5 rounded-full bg-success" />
+            Redirect forensics
+          </span>
+          <h2 className="mt-3 text-[26px] font-semibold leading-[1.12] tracking-tight text-foreground sm:text-4xl">
+            Trace every hop{" "}
+            <span className="text-gradient-brand">before it costs you a conversion</span>
+          </h2>
+          <p className="mt-3 max-w-2xl text-sm leading-relaxed text-muted-foreground sm:text-[15px]">
+            Real requests run server-side and follow every mechanism: HTTP redirects, meta refresh,
+            JavaScript navigation and cloaked affiliate hops — with status codes, timings, headers,
+            protocol changes and query-parameter diffs for each hop.
+          </p>
+        </section>
+
+        <UrlInputPanel
+          loading={mutation.isPending}
+          onAnalyze={(urls) => mutation.mutate(urls)}
+          onClear={() => {
+            setResults([]);
+            setShareIds({});
+            mutation.reset();
+          }}
+          onDemo={() => {
+            mutation.reset();
+            setShareIds({});
+            setResults(demoAnalysis());
+            toast.message("Demo data loaded", {
+              description: "Illustrative chain, not a live request.",
+            });
+          }}
+        />
+
+        {mutation.isPending ? <LoadingState /> : null}
+
+        {!mutation.isPending && mutation.isError ? (
+          <ErrorState message={(mutation.error as Error)?.message ?? "Unknown error"} />
+        ) : null}
+
+        {!mutation.isPending && !mutation.isError && results.length === 0 ? <EmptyState /> : null}
+
+        {!mutation.isPending && results.length > 1 ? (
+          <div className="panel animate-rise grid grid-cols-1 items-center gap-3 p-3 sm:flex sm:justify-between">
+            <span className="flex min-w-0 items-center gap-2 text-sm font-semibold text-foreground">
+              <Activity className="size-4 shrink-0 text-brand" />
+              {results.length} chains analyzed
+            </span>
+            <ExportBar results={results} />
+          </div>
+        ) : null}
+
+        {!mutation.isPending
+          ? results.map((result) => (
+              <ReportView
+                key={`${result.startUrl}-${result.analyzedAt}`}
+                result={result}
+                shareId={shareIds[analysisKey(result)]}
+              />
+            ))
+          : null}
+
+        <footer className="border-t border-hairline pt-4 text-center font-mono text-[11px] text-muted-foreground">
+          Requests run server-side behind SSRF protection, with a 20-hop limit, a 15 s per-hop timeout and a 55 s overall budget. Hops that cannot be safely followed are reported with the exact reason.
+        </footer>
+      </main>
     </div>
   );
 }

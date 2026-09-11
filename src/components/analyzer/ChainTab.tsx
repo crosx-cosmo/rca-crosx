@@ -1,13 +1,67 @@
-import { ChevronRight, Clock, Globe, Lock, MapPin, Server, Unlock } from "lucide-react";
+import {
+  ChevronRight,
+  Clock,
+  CodeXml,
+  CornerDownRight,
+  Flag,
+  Globe,
+  Lock,
+  MapPin,
+  MonitorPlay,
+  RefreshCw,
+  Server,
+  ShieldAlert,
+  Unlock,
+} from "lucide-react";
 import type { CSSProperties } from "react";
 
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 import { SLOW_HOP_MS, isRedirect } from "@/lib/redirect-analysis";
-import type { RedirectAnalysis } from "@/lib/redirect-types";
+import type { HopMechanism, RedirectAnalysis } from "@/lib/redirect-types";
 import { CopyButton } from "./CopyButton";
 import { StatusBadge, statusTone } from "./StatusBadge";
 import { IssueList } from "./IssueList";
+
+function mechanismTone(mechanism: HopMechanism | undefined): string {
+  switch (mechanism) {
+    case "javascript-redirect":
+      return "border-info/30 bg-info/10 text-info";
+    case "meta-refresh":
+      return "border-warning/35 bg-warning/10 text-warning-foreground";
+    case "browser-navigation":
+      return "border-brand/35 bg-brand/10 text-brand";
+    case "final-response":
+      return "border-success/30 bg-success/10 text-success";
+    case "blocked":
+    case "unresolved":
+    case "error":
+      return "border-destructive/30 bg-destructive/10 text-destructive";
+    default:
+      return "border-hairline bg-surface-muted text-muted-foreground";
+  }
+}
+
+function mechanismIcon(mechanism: HopMechanism | undefined) {
+  const className = "size-3";
+  switch (mechanism) {
+    case "javascript-redirect":
+      return <CodeXml className={className} />;
+    case "meta-refresh":
+      return <RefreshCw className={className} />;
+    case "browser-navigation":
+      return <MonitorPlay className={className} />;
+    case "final-response":
+      return <Flag className={className} />;
+    case "blocked":
+    case "unresolved":
+    case "error":
+      return <ShieldAlert className={className} />;
+    default:
+      return <CornerDownRight className={className} />;
+  }
+}
+
 
 const dotTone: Record<string, string> = {
   success: "bg-success",

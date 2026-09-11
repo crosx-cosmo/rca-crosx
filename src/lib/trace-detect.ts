@@ -69,7 +69,10 @@ function decodeAtob(html: string): ClientRedirectSignal | null {
       continue;
     }
     if (/^https?:\/\/\S+$/i.test(decoded.trim())) {
-      const around = html.slice(Math.max(0, match.index - 60), match.index + match[0].length);
+      const around = html.slice(
+        Math.max(0, match.index - 160),
+        match.index + match[0].length + 160,
+      );
       if (!/location|href|replace|assign|open/i.test(around)) continue;
       return {
         kind: "javascript-redirect",

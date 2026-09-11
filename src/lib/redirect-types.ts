@@ -99,4 +99,15 @@ export interface RedirectAnalysis {
   source: "live" | "demo";
   analyzedAt: string;
   error: string | null;
+  /** Why tracing stopped: "final-response" | "blocked" | "loop" | ... */
+  terminationReason?: string;
+  /** Plain-language explanation of the termination. */
+  terminationDetail?: string | null;
+  /** True when the final destination is confirmed (no unfollowable hop left). */
+  finalDestinationConfirmed?: boolean;
+  /** Set when the headless-browser fallback was used for at least one hop. */
+  browserFallbackUsed?: boolean;
+  /** Reason the browser fallback could not run, when it was needed. */
+  browserFallbackNote?: string | null;
 }
+

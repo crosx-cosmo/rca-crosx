@@ -55,6 +55,24 @@ export function isRedirect(status: number): boolean {
   return status >= 300 && status < 400;
 }
 
+/** Mechanisms that move the chain forward, whatever the status code was. */
+const REDIRECTING_MECHANISMS = new Set([
+  "http-redirect",
+  "javascript-redirect",
+  "meta-refresh",
+  "browser-navigation",
+]);
+
+/** True when this hop hands off to another URL (HTTP or client-side). */
+export function hopRedirects(hop: RedirectHop): boolean {
+  if (hop.mechanism) return REDIRECTING_MECHANISMS.has(hop.mechanism);
+  return isRedirect(hop.status);
+}
+
+export function countRedirects(hops: RedirectHop[]): number {
+  return hops.filter(hopRedirects).length;
+}
+
 export function protocolOf(url: string): "http" | "https" | "other" {
   if (url.startsWith("https:")) return "https";
   if (url.startsWith("http:")) return "http";
@@ -208,7 +226,7 @@ export function buildIssues(
     }
   });
 
-  const redirects = hops.filter((h) => isRedirect(h.status)).length;
+  const redirects = countRedirects(hops);
   if (redirects >= 3 && !opts.truncated) {
     push({
       id: "long-chain",
@@ -240,7 +258,7 @@ export function buildSeo(
     https: final ? final.protocol === "https" : false,
     canonical: page.canonical,
     metaRobots: page.metaRobots,
-    chainLength: hops.filter((h) => isRedirect(h.status)).length,
+    chainLength: countRedirects(hops),
   };
 }
 
@@ -262,7 +280,7 @@ export function assemble(params: {
     finalUrl: final?.url ?? params.startUrl,
     finalStatus: final?.status ?? null,
     totalHops: hops.length,
-    totalRedirects: hops.filter((h) => isRedirect(h.status)).length,
+    totalRedirects: countRedirects(hops),
     totalResponseTimeMs: hops.reduce((sum, h) => sum + h.responseTimeMs, 0),
     redirectLoop: params.redirectLoop,
     seo: buildSeo(hops, params.page),

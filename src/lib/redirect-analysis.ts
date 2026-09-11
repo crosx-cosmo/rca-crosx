@@ -159,6 +159,46 @@ export function buildIssues(
   }
 
   hops.forEach((hop) => {
+    if (hop.mechanism === "blocked") {
+      push({
+        id: `blocked-${hop.index}`,
+        level: "error",
+        title: "Destination blocked for safety",
+        detail: hop.blockedReason ?? "This destination failed the safety check and was not requested.",
+        hopIndex: hop.index,
+      });
+    }
+    if (hop.mechanism === "unresolved") {
+      push({
+        id: `unresolved-${hop.index}`,
+        level: "warning",
+        title: "Client-side redirect could not be followed",
+        detail: hop.blockedReason ?? "A navigation was detected but its destination could not be resolved.",
+        hopIndex: hop.index,
+      });
+    }
+    if (hop.mechanism === "javascript-redirect" || hop.mechanism === "meta-refresh") {
+      push({
+        id: `client-redirect-${hop.index}`,
+        level: "info",
+        title:
+          hop.mechanism === "meta-refresh"
+            ? "Meta refresh redirect"
+            : "JavaScript redirect inside a 200 response",
+        detail: `${hop.url} → ${hop.nextUrl ?? "unknown"}${hop.mechanismDetail ? ` (${hop.mechanismDetail})` : ""}`,
+        hopIndex: hop.index,
+      });
+    }
+    if (hop.mechanism === "browser-navigation") {
+      push({
+        id: `browser-nav-${hop.index}`,
+        level: "info",
+        title: "Resolved with a headless browser",
+        detail: `${hop.url} navigated to ${hop.nextUrl ?? "unknown"} only after scripts ran.`,
+        hopIndex: hop.index,
+      });
+    }
+
     if (isRedirect(hop.status) && !hop.location) {
       push({
         id: `missing-location-${hop.index}`,

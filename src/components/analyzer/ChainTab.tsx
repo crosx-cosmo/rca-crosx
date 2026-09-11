@@ -121,10 +121,25 @@ export function ChainTab({ result }: { result: RedirectAnalysis }) {
                   <Badge variant="secondary" className="font-mono text-[10px] tabular-nums">
                     HOP {hop.index + 1}
                   </Badge>
-                  <StatusBadge status={hop.status} />
-                  <span className="text-[11px] font-medium text-muted-foreground">
-                    {hop.redirectType}
+                  {hop.status ? <StatusBadge status={hop.status} /> : null}
+                  <span
+                    className={cn(
+                      "inline-flex items-center gap-1 rounded-md border px-1.5 py-0.5 text-[10px] font-semibold",
+                      mechanismTone(hop.mechanism),
+                    )}
+                  >
+                    {mechanismIcon(hop.mechanism)}
+                    {hop.mechanismLabel ?? hop.redirectType}
                   </span>
+                  {hop.mechanismDetail ? (
+                    <span className="text-[11px] font-medium text-muted-foreground">
+                      {hop.mechanismDetail}
+                    </span>
+                  ) : (
+                    <span className="text-[11px] font-medium text-muted-foreground">
+                      {hop.redirectType}
+                    </span>
+                  )}
                   {hop.protocol === "https" ? (
                     <span className="ml-auto inline-flex items-center gap-1 rounded-md border border-success/25 bg-success/10 px-1.5 py-0.5 text-[10px] font-semibold text-success">
                       <Lock className="size-3" /> HTTPS
@@ -154,22 +169,39 @@ export function ChainTab({ result }: { result: RedirectAnalysis }) {
                   <Meta icon={MapPin} label="Node / IP" value={hop.ip ?? "not exposed"} />
                 </div>
 
-                {isRedirect(hop.status) ? (
+                {hop.nextUrl ? (
+                  <div className="mt-3 rounded-lg border border-hairline bg-surface-muted px-3 py-2">
+                    <p className="text-[10px] font-semibold uppercase tracking-[0.08em] text-muted-foreground">
+                      {hop.mechanism === "http-redirect" ? "Location header → destination" : "Detected destination"}
+                    </p>
+                    <p className="mt-0.5 break-all font-mono text-xs text-foreground">
+                      {hop.nextUrl}
+                    </p>
+                    {hop.evidence ? (
+                      <p className="mt-1 break-all font-mono text-[10.5px] text-muted-foreground">
+                        {hop.evidence}
+                      </p>
+                    ) : null}
+                  </div>
+                ) : isRedirect(hop.status) ? (
                   <div className="mt-3 rounded-lg border border-hairline bg-surface-muted px-3 py-2">
                     <p className="text-[10px] font-semibold uppercase tracking-[0.08em] text-muted-foreground">
                       Location header
                     </p>
-                    <p
-                      className={cn(
-                        "mt-0.5 break-all font-mono text-xs",
-                        hop.location ? "text-foreground" : "text-destructive",
-                      )}
-                    >
+                    <p className="mt-0.5 break-all font-mono text-xs text-destructive">
                       {hop.location ?? "missing — broken redirect"}
                     </p>
                   </div>
                 ) : null}
+
+                {hop.blockedReason ? (
+                  <p className="mt-3 flex items-start gap-1.5 rounded-lg border border-warning/35 bg-warning/10 px-3 py-2 text-[11.5px] text-warning-foreground">
+                    <ShieldAlert className="mt-0.5 size-3.5 shrink-0" />
+                    <span className="min-w-0">{hop.blockedReason}</span>
+                  </p>
+                ) : null}
               </div>
+
             </li>
           );
         })}

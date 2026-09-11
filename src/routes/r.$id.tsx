@@ -2,8 +2,8 @@ import { useQuery } from "@tanstack/react-query";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { ArrowLeft, FileSearch } from "lucide-react";
 
-import markDark from "@/assets/crosx-mark-dark.png.asset.json";
-import markLight from "@/assets/crosx-mark-light.png.asset.json";
+import markDark from "@/assets/crosx-mark-dark.png";
+import markLight from "@/assets/crosx-mark-light.png";
 import { ReportView } from "@/components/analyzer/ReportView";
 import { ErrorState, LoadingState } from "@/components/analyzer/States";
 import { ThemeToggle } from "@/components/ThemeToggle";
@@ -42,7 +42,7 @@ function SharedReportPage() {
         <div className="mx-auto flex max-w-5xl items-center gap-3 px-4 py-3 sm:gap-4 sm:px-6">
           <Link to="/" aria-label="CROSX home" className="flex shrink-0 items-center">
             <img
-              src={markLight.url}
+              src={markLight}
               alt="CROSX Advertising & Marketing Agency"
               width={1699}
               height={545}
@@ -50,7 +50,7 @@ function SharedReportPage() {
               className="h-5 w-auto dark:hidden sm:h-[22px]"
             />
             <img
-              src={markDark.url}
+              src={markDark}
               alt=""
               aria-hidden="true"
               width={1699}

@@ -1,5 +1,16 @@
 export type IssueLevel = "error" | "warning" | "info";
 
+/** How the analyzer moved (or failed to move) from one URL to the next. */
+export type HopMechanism =
+  | "http-redirect"
+  | "javascript-redirect"
+  | "meta-refresh"
+  | "browser-navigation"
+  | "final-response"
+  | "blocked"
+  | "unresolved"
+  | "error";
+
 export interface RedirectHop {
   index: number;
   url: string;
@@ -14,7 +25,22 @@ export interface RedirectHop {
   ip: string | null;
   headers: Record<string, string>;
   params: Record<string, string>;
+  /** Mechanism that produced the next hop (or ended the chain). */
+  mechanism?: HopMechanism;
+  /** Human label shown on the hop card, e.g. "JavaScript Redirect". */
+  mechanismLabel?: string;
+  /** Precise technique, e.g. "location.replace()" or "meta refresh (0s)". */
+  mechanismDetail?: string | null;
+  /** Source fragment the detection was based on. */
+  evidence?: string | null;
+  /** Unified destination for this hop, whatever the mechanism was. */
+  nextUrl?: string | null;
+  /** Exact reason the chain could not continue from this hop. */
+  blockedReason?: string | null;
+  /** IP addresses the hostname resolved to during the safety check. */
+  addresses?: string[];
 }
+
 
 export interface AnalysisIssue {
   id: string;

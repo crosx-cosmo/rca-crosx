@@ -173,3 +173,19 @@ export function extractPageMeta(html: string) {
   const title = html.match(/<title[^>]*>([\s\S]{0,300}?)<\/title>/i)?.[1]?.trim() ?? null;
   return { canonical, metaRobots, title };
 }
+
+/**
+ * True when a page looks like a thin interstitial/redirector rather than real
+ * content. Used to avoid flagging ordinary script-heavy pages (Google, SPAs)
+ * as unresolved client-side redirects.
+ */
+export function looksLikeRedirector(html: string): boolean {
+  if (html.length > 60_000) return false;
+  const text = html
+    .replace(/<script[\s\S]*?<\/script>/gi, " ")
+    .replace(/<style[\s\S]*?<\/style>/gi, " ")
+    .replace(/<[^>]+>/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+  return text.length < 1200;
+}

@@ -15,7 +15,12 @@
  *  - when a hop cannot be followed, the exact reason is attached to it
  */
 import { assemble, isRedirect, normalizeUrl, paramsOf, protocolOf, redirectTypeLabel } from "./redirect-analysis";
-import { detectClientRedirect, extractPageMeta, parseRefreshValue } from "./trace-detect";
+import {
+  detectClientRedirect,
+  extractPageMeta,
+  looksLikeRedirector,
+  parseRefreshValue,
+} from "./trace-detect";
 import { assertSafeUrl } from "./trace-ssrf.server";
 import { browserFallbackConfigured, traceWithBrowser } from "./trace-browser.server";
 import type { HopMechanism, RedirectAnalysis, RedirectHop } from "./redirect-types";
@@ -354,7 +359,7 @@ export async function traceUrl(rawUrl: string): Promise<RedirectAnalysis> {
       continue;
     }
 
-    if (detection.hint) {
+    if (detection.hint && looksLikeRedirector(html)) {
       // Dynamic navigation: only a real browser can resolve it.
       const browserBudget = Math.min(30_000, deadline - Date.now());
       const rendered =

@@ -70,7 +70,9 @@ export const listShortLinks = createServerFn({ method: "POST" })
   .inputValidator((d) => z.object({ owner }).parse(d))
   .handler(async ({ data }) => {
     const { shortLinkDb } = await import("./shortlinks.server");
-    const { data: rows, error } = await shortLinkDb().rpc("list_short_links", { p_owner: data.owner });
+    const { data: rows, error } = await shortLinkDb().rpc("list_short_links", {
+      p_owner: data.owner,
+    });
     if (error) throw dbError(error.message);
     return (rows ?? []) as ShortLink[];
   });

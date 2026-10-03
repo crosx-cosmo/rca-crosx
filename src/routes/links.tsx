@@ -77,7 +77,9 @@ function LinksPage() {
 
   const createMut = useMutation({
     mutationFn: () =>
-      create({ data: { destination: destination.trim(), slug: slug.trim() || undefined, owner: owner! } }),
+      create({
+        data: { destination: destination.trim(), slug: slug.trim() || undefined, owner: owner! },
+      }),
     onSuccess: (row) => {
       const url = `${origin}/s/${row.slug}`;
       toast.success("Short link created", { description: url });
@@ -105,7 +107,9 @@ function LinksPage() {
             />
           </Link>
           <span aria-hidden="true" className="h-6 w-px shrink-0 bg-hairline" />
-          <h1 className="min-w-0 flex-1 truncate text-[15px] font-semibold text-foreground">Short Links</h1>
+          <h1 className="min-w-0 flex-1 truncate text-[15px] font-semibold text-foreground">
+            Short Links
+          </h1>
           <Button asChild variant="subtle" size="sm">
             <Link to="/">
               <ArrowLeft className="size-3.5" />
@@ -137,7 +141,9 @@ function LinksPage() {
           />
           <div className="flex flex-col gap-2 sm:flex-row">
             <div className="flex flex-1 items-center rounded-xl border border-hairline bg-surface-muted pl-3 font-mono text-sm text-muted-foreground">
-              <span className="shrink-0 truncate">{origin ? `${new URL(origin).host}/s/` : "/s/"}</span>
+              <span className="shrink-0 truncate">
+                {origin ? `${new URL(origin).host}/s/` : "/s/"}
+              </span>
               <Input
                 value={slug}
                 onChange={(e) => setSlug(e.target.value.replace(/[^A-Za-z0-9_-]/g, ""))}
@@ -146,8 +152,17 @@ function LinksPage() {
                 className="h-11 border-0 bg-transparent font-mono shadow-none focus-visible:ring-0"
               />
             </div>
-            <Button type="submit" variant="hero" size="lg" disabled={!owner || !destination.trim() || createMut.isPending}>
-              {createMut.isPending ? <Loader2 className="size-4 animate-spin" /> : <Plus className="size-4" />}
+            <Button
+              type="submit"
+              variant="hero"
+              size="lg"
+              disabled={!owner || !destination.trim() || createMut.isPending}
+            >
+              {createMut.isPending ? (
+                <Loader2 className="size-4 animate-spin" />
+              ) : (
+                <Plus className="size-4" />
+              )}
               Shorten
             </Button>
           </div>
@@ -172,7 +187,9 @@ function LinksPage() {
           {links.isLoading ? (
             <p className="py-6 text-center text-sm text-muted-foreground">Loading…</p>
           ) : links.isError ? (
-            <p className="py-6 text-center text-sm text-destructive">{(links.error as Error).message}</p>
+            <p className="py-6 text-center text-sm text-destructive">
+              {(links.error as Error).message}
+            </p>
           ) : filtered.length === 0 ? (
             <p className="py-6 text-center text-sm text-muted-foreground">
               {links.data?.length ? "No links match your search." : "No short links yet."}
@@ -185,14 +202,22 @@ function LinksPage() {
                   <li key={l.id} className="flex flex-col gap-2 py-3 sm:flex-row sm:items-center">
                     <div className="min-w-0 flex-1">
                       <div className="flex items-center gap-2">
-                        <a href={shortUrl} target="_blank" rel="noreferrer" className="truncate font-mono text-sm font-semibold text-brand">
+                        <a
+                          href={shortUrl}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="truncate font-mono text-sm font-semibold text-brand"
+                        >
                           /s/{l.slug}
                         </a>
                         <CopyButton value={shortUrl} label="Copy short URL" />
                       </div>
-                      <p className="truncate font-mono text-[11.5px] text-muted-foreground">{l.destination}</p>
+                      <p className="truncate font-mono text-[11.5px] text-muted-foreground">
+                        {l.destination}
+                      </p>
                       <p className="text-[11px] text-muted-foreground">
-                        {l.clicks} click{l.clicks === 1 ? "" : "s"} · created {fmt(l.created_at)} · last click {fmt(l.last_clicked_at)}
+                        {l.clicks} click{l.clicks === 1 ? "" : "s"} · created {fmt(l.created_at)} ·
+                        last click {fmt(l.last_clicked_at)}
                       </p>
                     </div>
                     <div className="flex items-center gap-3">

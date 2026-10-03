@@ -28,7 +28,11 @@ export async function validateDestination(raw: string, selfHost?: string): Promi
     return "Enter a full URL starting with http:// or https://.";
   }
   if (url.username || url.password) return "URLs with embedded credentials are not allowed.";
-  if (selfHost && url.host.toLowerCase() === selfHost.toLowerCase() && url.pathname.startsWith("/s/")) {
+  if (
+    selfHost &&
+    url.host.toLowerCase() === selfHost.toLowerCase() &&
+    url.pathname.startsWith("/s/")
+  ) {
     return "A short link cannot point to another short link on this site.";
   }
   const verdict = await assertSafeUrl(url.toString());

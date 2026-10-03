@@ -11,7 +11,9 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as ApiDocsRouteImport } from './routes/api-docs'
+import { Route as LinksRouteImport } from './routes/links'
 import { Route as RIdRouteImport } from './routes/r.$id'
+import { Route as SSlugRouteImport } from './routes/s.$slug'
 import { Route as ApiPublicTraceRouteImport } from './routes/api/public/trace'
 
 const IndexRoute = IndexRouteImport.update({
@@ -24,9 +26,19 @@ const ApiDocsRoute = ApiDocsRouteImport.update({
   path: '/api-docs',
   getParentRoute: () => rootRouteImport,
 } as any)
+const LinksRoute = LinksRouteImport.update({
+  id: '/links',
+  path: '/links',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const RIdRoute = RIdRouteImport.update({
   id: '/r/$id',
   path: '/r/$id',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SSlugRoute = SSlugRouteImport.update({
+  id: '/s/$slug',
+  path: '/s/$slug',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ApiPublicTraceRoute = ApiPublicTraceRouteImport.update({
@@ -38,34 +50,50 @@ const ApiPublicTraceRoute = ApiPublicTraceRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/api-docs': typeof ApiDocsRoute
+  '/links': typeof LinksRoute
   '/r/$id': typeof RIdRoute
+  '/s/$slug': typeof SSlugRoute
   '/api/public/trace': typeof ApiPublicTraceRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/api-docs': typeof ApiDocsRoute
+  '/links': typeof LinksRoute
   '/r/$id': typeof RIdRoute
+  '/s/$slug': typeof SSlugRoute
   '/api/public/trace': typeof ApiPublicTraceRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/api-docs': typeof ApiDocsRoute
+  '/links': typeof LinksRoute
   '/r/$id': typeof RIdRoute
+  '/s/$slug': typeof SSlugRoute
   '/api/public/trace': typeof ApiPublicTraceRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/api-docs' | '/r/$id' | '/api/public/trace'
+  fullPaths:
+    '/' | '/api-docs' | '/links' | '/r/$id' | '/s/$slug' | '/api/public/trace'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/api-docs' | '/r/$id' | '/api/public/trace'
-  id: '__root__' | '/' | '/api-docs' | '/r/$id' | '/api/public/trace'
+  to: '/' | '/api-docs' | '/links' | '/r/$id' | '/s/$slug' | '/api/public/trace'
+  id:
+    | '__root__'
+    | '/'
+    | '/api-docs'
+    | '/links'
+    | '/r/$id'
+    | '/s/$slug'
+    | '/api/public/trace'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   ApiDocsRoute: typeof ApiDocsRoute
+  LinksRoute: typeof LinksRoute
   RIdRoute: typeof RIdRoute
+  SSlugRoute: typeof SSlugRoute
   ApiPublicTraceRoute: typeof ApiPublicTraceRoute
 }
 
@@ -85,11 +113,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiDocsRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/links': {
+      id: '/links'
+      path: '/links'
+      fullPath: '/links'
+      preLoaderRoute: typeof LinksRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/r/$id': {
       id: '/r/$id'
       path: '/r/$id'
       fullPath: '/r/$id'
       preLoaderRoute: typeof RIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/s/$slug': {
+      id: '/s/$slug'
+      path: '/s/$slug'
+      fullPath: '/s/$slug'
+      preLoaderRoute: typeof SSlugRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/public/trace': {
@@ -105,7 +147,9 @@ declare module '@tanstack/react-router' {
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   ApiDocsRoute: ApiDocsRoute,
+  LinksRoute: LinksRoute,
   RIdRoute: RIdRoute,
+  SSlugRoute: SSlugRoute,
   ApiPublicTraceRoute: ApiPublicTraceRoute,
 }
 export const routeTree = rootRouteImport

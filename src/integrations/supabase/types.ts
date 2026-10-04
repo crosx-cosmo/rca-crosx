@@ -14,13 +14,134 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      redirect_analyses: {
+        Row: {
+          created_at: string
+          final_status: number | null
+          final_url: string | null
+          id: string
+          issue_count: number
+          redirect_loop: boolean
+          result: Json
+          start_url: string
+          total_hops: number
+          total_redirects: number
+          total_response_time_ms: number
+        }
+        Insert: {
+          created_at?: string
+          final_status?: number | null
+          final_url?: string | null
+          id?: string
+          issue_count?: number
+          redirect_loop?: boolean
+          result: Json
+          start_url: string
+          total_hops?: number
+          total_redirects?: number
+          total_response_time_ms?: number
+        }
+        Update: {
+          created_at?: string
+          final_status?: number | null
+          final_url?: string | null
+          id?: string
+          issue_count?: number
+          redirect_loop?: boolean
+          result?: Json
+          start_url?: string
+          total_hops?: number
+          total_redirects?: number
+          total_response_time_ms?: number
+        }
+        Relationships: []
+      }
+      short_links: {
+        Row: {
+          clicks: number
+          created_at: string
+          destination: string
+          enabled: boolean
+          id: string
+          last_clicked_at: string | null
+          owner_hash: string
+          slug: string
+        }
+        Insert: {
+          clicks?: number
+          created_at?: string
+          destination: string
+          enabled?: boolean
+          id?: string
+          last_clicked_at?: string | null
+          owner_hash: string
+          slug: string
+        }
+        Update: {
+          clicks?: number
+          created_at?: string
+          destination?: string
+          enabled?: boolean
+          id?: string
+          last_clicked_at?: string | null
+          owner_hash?: string
+          slug?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      _sl_hash: { Args: { token: string }; Returns: string }
+      create_short_link: {
+        Args: { p_destination: string; p_owner: string; p_slug: string }
+        Returns: {
+          clicks: number
+          created_at: string
+          destination: string
+          enabled: boolean
+          id: string
+          last_clicked_at: string | null
+          owner_hash: string
+          slug: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "short_links"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
+      delete_short_link: {
+        Args: { p_id: string; p_owner: string }
+        Returns: boolean
+      }
+      list_short_links: {
+        Args: { p_owner: string }
+        Returns: {
+          clicks: number
+          created_at: string
+          destination: string
+          enabled: boolean
+          id: string
+          last_clicked_at: string | null
+          owner_hash: string
+          slug: string
+        }[]
+        SetofOptions: {
+          from: "*"
+          to: "short_links"
+          isOneToOne: false
+          isSetofReturn: true
+        }
+      }
+      resolve_short_link: { Args: { p_slug: string }; Returns: string }
+      set_short_link_enabled: {
+        Args: { p_enabled: boolean; p_id: string; p_owner: string }
+        Returns: boolean
+      }
     }
     Enums: {
       [_ in never]: never

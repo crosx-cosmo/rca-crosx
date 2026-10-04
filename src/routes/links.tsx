@@ -1,11 +1,24 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
-import { ArrowLeft, Link2, Loader2, Plus, Search, Trash2 } from "lucide-react";
+import {
+  ArrowLeft,
+  CalendarClock,
+  Check,
+  Download,
+  Link2,
+  Loader2,
+  Pencil,
+  Plus,
+  Search,
+  Trash2,
+  X,
+} from "lucide-react";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 
 import { CopyButton } from "@/components/analyzer/CopyButton";
+import { ShortLinkQr } from "@/components/ShortLinkQr";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -16,11 +29,14 @@ import {
   deleteShortLink,
   listShortLinks,
   setShortLinkEnabled,
+  setShortLinkExpiry,
+  updateShortLinkDestination,
+  type ShortLink,
 } from "@/lib/shortlinks.functions";
 
 const TITLE = "Short Links — Redirect Chain Analyzer";
 const DESCRIPTION =
-  "Create transparent short URLs with custom slugs, click counts and simple management — validated against unsafe destinations.";
+  "Create transparent short URLs with custom slugs, QR codes, expiry, click counts and simple management — validated against unsafe destinations.";
 
 export const Route = createFileRoute("/links")({
   head: () => ({
@@ -53,6 +69,35 @@ function useOwner(): string | null {
 
 const fmt = (iso: string | null) => (iso ? new Date(iso).toLocaleString() : "—");
 
+const isExpired = (l: ShortLink) => !!l.expires_at && new Date(l.expires_at).getTime() <= Date.now();
+
+function exportCsv(rows: ShortLink[], origin: string) {
+  const header = ["slug", "short_url", "destination", "enabled", "clicks", "created_at", "last_clicked_at", "expires_at"];
+  const esc = (v: string) => `"${v.replace(/"/g, '""')}"`;
+  const lines = rows.map((l) =>
+    [
+      l.slug,
+      `${origin}/s/${l.slug}`,
+      l.destination,
+      String(l.enabled),
+      String(l.clicks),
+      l.created_at,
+      l.last_clicked_at ?? "",
+      l.expires_at ?? "",
+    ]
+      .map(esc)
+      .join(","),
+  );
+  const blob = new Blob([header.join(",") + "\n" + lines.join("\n")], {
+    type: "text/csv;charset=utf-8",
+  });
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(blob);
+  a.download = "short-links.csv";
+  a.click();
+  URL.revokeObjectURL(a.href);
+}
+
 function LinksPage() {
   const owner = useOwner();
   const qc = useQueryClient();
@@ -60,12 +105,18 @@ function LinksPage() {
   const [slug, setSlug] = useState("");
   const [search, setSearch] = useState("");
   const [origin, setOrigin] = useState("");
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [editValue, setEditValue] = useState("");
+  const [expiryId, setExpiryId] = useState<string | null>(null);
+  const [expiryValue, setExpiryValue] = useState("");
   useEffect(() => setOrigin(window.location.origin), []);
 
   const list = useServerFn(listShortLinks);
   const create = useServerFn(createShortLink);
   const toggle = useServerFn(setShortLinkEnabled);
   const remove = useServerFn(deleteShortLink);
+  const updateDest = useServerFn(updateShortLinkDestination);
+  const setExpiry = useServerFn(setShortLinkExpiry);
 
   const links = useQuery({
     queryKey: ["short-links", owner],
@@ -91,9 +142,12 @@ function LinksPage() {
     onError: (e: Error) => toast.error(e.message),
   });
 
-  const filtered = (links.data ?? []).filter((l) =>
+  const all = links.data ?? [];
+  const filtered = all.filter((l) =>
     `${l.slug} ${l.destination}`.toLowerCase().includes(search.toLowerCase()),
   );
+  const totalClicks = all.reduce((sum, l) => sum + l.clicks, 0);
+  const activeCount = all.filter((l) => l.enabled && !isExpired(l)).length;
 
   return (
     <div className="bg-hero min-h-screen">
@@ -173,15 +227,41 @@ function LinksPage() {
           </p>
         </form>
 
+        {all.length > 0 && (
+          <div className="grid grid-cols-3 gap-3">
+            {[
+              { label: "Total links", value: all.length },
+              { label: "Active", value: activeCount },
+              { label: "Total clicks", value: totalClicks },
+            ].map((s) => (
+              <div key={s.label} className="panel animate-rise p-3 text-center sm:p-4">
+                <p className="text-xl font-bold text-foreground sm:text-2xl">{s.value}</p>
+                <p className="text-[11px] text-muted-foreground">{s.label}</p>
+              </div>
+            ))}
+          </div>
+        )}
+
         <section className="panel animate-rise p-4 sm:p-6">
           <div className="mb-3 flex items-center gap-2">
-            <Search className="size-4 text-muted-foreground" />
+            <Search className="size-4 shrink-0 text-muted-foreground" />
             <Input
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               placeholder="Search your links"
               className="h-9 border-hairline bg-surface-muted text-sm"
             />
+            {all.length > 0 && (
+              <Button
+                variant="subtle"
+                size="sm"
+                className="shrink-0"
+                onClick={() => exportCsv(filtered, origin)}
+              >
+                <Download className="size-3.5" />
+                <span className="hidden sm:inline">Export CSV</span>
+              </Button>
+            )}
           </div>
 
           {links.isLoading ? (
@@ -198,55 +278,173 @@ function LinksPage() {
             <ul className="divide-y divide-hairline">
               {filtered.map((l) => {
                 const shortUrl = `${origin}/s/${l.slug}`;
+                const expired = isExpired(l);
+                const editing = editingId === l.id;
+                const settingExpiry = expiryId === l.id;
                 return (
-                  <li key={l.id} className="flex flex-col gap-2 py-3 sm:flex-row sm:items-center">
-                    <div className="min-w-0 flex-1">
-                      <div className="flex items-center gap-2">
-                        <a
-                          href={shortUrl}
-                          target="_blank"
-                          rel="noreferrer"
-                          className="truncate font-mono text-sm font-semibold text-brand"
-                        >
-                          /s/{l.slug}
-                        </a>
-                        <CopyButton value={shortUrl} label="Copy short URL" />
+                  <li key={l.id} className="flex flex-col gap-2 py-3">
+                    <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
+                      <div className="min-w-0 flex-1">
+                        <div className="flex items-center gap-2">
+                          <a
+                            href={shortUrl}
+                            target="_blank"
+                            rel="noreferrer"
+                            className="truncate font-mono text-sm font-semibold text-brand"
+                          >
+                            /s/{l.slug}
+                          </a>
+                          <CopyButton value={shortUrl} label="Copy short URL" />
+                          {expired && (
+                            <span className="rounded-full bg-destructive/10 px-2 py-0.5 text-[10px] font-semibold text-destructive">
+                              Expired
+                            </span>
+                          )}
+                        </div>
+                        <p className="truncate font-mono text-[11.5px] text-muted-foreground">
+                          {l.destination}
+                        </p>
+                        <p className="text-[11px] text-muted-foreground">
+                          {l.clicks} click{l.clicks === 1 ? "" : "s"} · created {fmt(l.created_at)}{" "}
+                          · last click {fmt(l.last_clicked_at)}
+                          {l.expires_at && ` · expires ${fmt(l.expires_at)}`}
+                        </p>
                       </div>
-                      <p className="truncate font-mono text-[11.5px] text-muted-foreground">
-                        {l.destination}
-                      </p>
-                      <p className="text-[11px] text-muted-foreground">
-                        {l.clicks} click{l.clicks === 1 ? "" : "s"} · created {fmt(l.created_at)} ·
-                        last click {fmt(l.last_clicked_at)}
-                      </p>
+                      <div className="flex items-center gap-1">
+                        <ShortLinkQr url={shortUrl} slug={l.slug} />
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          aria-label="Edit destination"
+                          onClick={() => {
+                            setEditingId(editing ? null : l.id);
+                            setEditValue(l.destination);
+                            setExpiryId(null);
+                          }}
+                        >
+                          <Pencil className="size-4" />
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          aria-label="Set expiry"
+                          onClick={() => {
+                            setExpiryId(settingExpiry ? null : l.id);
+                            setExpiryValue(
+                              l.expires_at
+                                ? new Date(l.expires_at).toISOString().slice(0, 16)
+                                : "",
+                            );
+                            setEditingId(null);
+                          }}
+                        >
+                          <CalendarClock className="size-4" />
+                        </Button>
+                        <Switch
+                          checked={l.enabled}
+                          aria-label={l.enabled ? "Disable link" : "Enable link"}
+                          onCheckedChange={(v) =>
+                            toggle({ data: { id: l.id, enabled: v, owner: owner! } })
+                              .then(refresh)
+                              .catch((e: Error) => toast.error(e.message))
+                          }
+                        />
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          aria-label="Delete link"
+                          onClick={() => {
+                            if (!confirm(`Delete /s/${l.slug}?`)) return;
+                            remove({ data: { id: l.id, owner: owner! } })
+                              .then(() => {
+                                toast.success("Link deleted");
+                                refresh();
+                              })
+                              .catch((e: Error) => toast.error(e.message));
+                          }}
+                        >
+                          <Trash2 className="size-4" />
+                        </Button>
+                      </div>
                     </div>
-                    <div className="flex items-center gap-3">
-                      <Switch
-                        checked={l.enabled}
-                        aria-label={l.enabled ? "Disable link" : "Enable link"}
-                        onCheckedChange={(v) =>
-                          toggle({ data: { id: l.id, enabled: v, owner: owner! } })
-                            .then(refresh)
-                            .catch((e: Error) => toast.error(e.message))
-                        }
-                      />
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        aria-label="Delete link"
-                        onClick={() => {
-                          if (!confirm(`Delete /s/${l.slug}?`)) return;
-                          remove({ data: { id: l.id, owner: owner! } })
+
+                    {editing && (
+                      <form
+                        className="flex flex-col gap-2 sm:flex-row"
+                        onSubmit={(e) => {
+                          e.preventDefault();
+                          updateDest({
+                            data: { id: l.id, destination: editValue.trim(), owner: owner! },
+                          })
                             .then(() => {
-                              toast.success("Link deleted");
+                              toast.success("Destination updated");
+                              setEditingId(null);
                               refresh();
                             })
-                            .catch((e: Error) => toast.error(e.message));
+                            .catch((err: Error) => toast.error(err.message));
                         }}
                       >
-                        <Trash2 className="size-4" />
-                      </Button>
-                    </div>
+                        <Input
+                          value={editValue}
+                          onChange={(e) => setEditValue(e.target.value)}
+                          inputMode="url"
+                          spellCheck={false}
+                          className="h-9 flex-1 border-hairline bg-surface-muted font-mono text-sm"
+                        />
+                        <div className="flex gap-2">
+                          <Button type="submit" variant="hero" size="sm" disabled={!editValue.trim()}>
+                            <Check className="size-3.5" /> Save
+                          </Button>
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => setEditingId(null)}
+                          >
+                            <X className="size-3.5" /> Cancel
+                          </Button>
+                        </div>
+                      </form>
+                    )}
+
+                    {settingExpiry && (
+                      <form
+                        className="flex flex-col gap-2 sm:flex-row sm:items-center"
+                        onSubmit={(e) => {
+                          e.preventDefault();
+                          const iso = expiryValue
+                            ? new Date(expiryValue).toISOString()
+                            : null;
+                          setExpiry({ data: { id: l.id, expiresAt: iso, owner: owner! } })
+                            .then(() => {
+                              toast.success(iso ? "Expiry set" : "Expiry removed");
+                              setExpiryId(null);
+                              refresh();
+                            })
+                            .catch((err: Error) => toast.error(err.message));
+                        }}
+                      >
+                        <Input
+                          type="datetime-local"
+                          value={expiryValue}
+                          onChange={(e) => setExpiryValue(e.target.value)}
+                          className="h-9 flex-1 border-hairline bg-surface-muted text-sm"
+                        />
+                        <div className="flex gap-2">
+                          <Button type="submit" variant="hero" size="sm">
+                            <Check className="size-3.5" /> {expiryValue ? "Set expiry" : "Remove expiry"}
+                          </Button>
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => setExpiryId(null)}
+                          >
+                            <X className="size-3.5" /> Cancel
+                          </Button>
+                        </div>
+                      </form>
+                    )}
                   </li>
                 );
               })}

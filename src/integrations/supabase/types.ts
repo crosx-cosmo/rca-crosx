@@ -62,6 +62,7 @@ export type Database = {
           created_at: string
           destination: string
           enabled: boolean
+          expires_at: string | null
           id: string
           last_clicked_at: string | null
           owner_hash: string
@@ -72,6 +73,7 @@ export type Database = {
           created_at?: string
           destination: string
           enabled?: boolean
+          expires_at?: string | null
           id?: string
           last_clicked_at?: string | null
           owner_hash: string
@@ -82,6 +84,7 @@ export type Database = {
           created_at?: string
           destination?: string
           enabled?: boolean
+          expires_at?: string | null
           id?: string
           last_clicked_at?: string | null
           owner_hash?: string
@@ -102,6 +105,7 @@ export type Database = {
           created_at: string
           destination: string
           enabled: boolean
+          expires_at: string | null
           id: string
           last_clicked_at: string | null
           owner_hash: string
@@ -125,6 +129,7 @@ export type Database = {
           created_at: string
           destination: string
           enabled: boolean
+          expires_at: string | null
           id: string
           last_clicked_at: string | null
           owner_hash: string
@@ -140,6 +145,14 @@ export type Database = {
       resolve_short_link: { Args: { p_slug: string }; Returns: string }
       set_short_link_enabled: {
         Args: { p_enabled: boolean; p_id: string; p_owner: string }
+        Returns: boolean
+      }
+      set_short_link_expiry: {
+        Args: { p_expires_at: string; p_id: string; p_owner: string }
+        Returns: boolean
+      }
+      update_short_link_destination: {
+        Args: { p_destination: string; p_id: string; p_owner: string }
         Returns: boolean
       }
     }

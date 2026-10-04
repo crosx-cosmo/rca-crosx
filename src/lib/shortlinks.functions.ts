@@ -102,3 +102,48 @@ export const deleteShortLink = createServerFn({ method: "POST" })
     if (error) throw dbError(error.message);
     return { ok: true };
   });
+
+export const updateShortLinkDestination = createServerFn({ method: "POST" })
+  .inputValidator((d) =>
+    z
+      .object({ id: z.string().uuid(), destination: z.string().trim().min(1).max(2048), owner })
+      .parse(d),
+  )
+  .handler(async ({ data }) => {
+    const { shortLinkDb, validateDestination } = await import("./shortlinks.server");
+    const problem = await validateDestination(data.destination, getRequestHost());
+    if (problem) throw new Error(problem);
+    const { data: ok, error } = await shortLinkDb().rpc("update_short_link_destination", {
+      p_id: data.id,
+      p_owner: data.owner,
+      p_destination: new URL(data.destination).toString(),
+    });
+    if (error) throw dbError(error.message);
+    if (!ok) throw new Error("Link not found.");
+    return { ok: true };
+  });
+
+export const setShortLinkExpiry = createServerFn({ method: "POST" })
+  .inputValidator((d) =>
+    z
+      .object({
+        id: z.string().uuid(),
+        expiresAt: z.string().datetime({ offset: true }).nullable(),
+        owner,
+      })
+      .parse(d),
+  )
+  .handler(async ({ data }) => {
+    if (data.expiresAt && new Date(data.expiresAt).getTime() <= Date.now()) {
+      throw new Error("Expiry must be in the future.");
+    }
+    const { shortLinkDb } = await import("./shortlinks.server");
+    const { data: ok, error } = await shortLinkDb().rpc("set_short_link_expiry", {
+      p_id: data.id,
+      p_owner: data.owner,
+      p_expires_at: data.expiresAt,
+    });
+    if (error) throw dbError(error.message);
+    if (!ok) throw new Error("Link not found.");
+    return { ok: true };
+  });

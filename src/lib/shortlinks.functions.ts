@@ -10,6 +10,7 @@ export interface ShortLink {
   clicks: number;
   last_clicked_at: string | null;
   created_at: string;
+  expires_at: string | null;
 }
 
 const owner = z.string().regex(/^[A-Za-z0-9-]{32,128}$/, "Invalid owner token");

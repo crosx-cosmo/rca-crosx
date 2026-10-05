@@ -69,10 +69,20 @@ function useOwner(): string | null {
 
 const fmt = (iso: string | null) => (iso ? new Date(iso).toLocaleString() : "—");
 
-const isExpired = (l: ShortLink) => !!l.expires_at && new Date(l.expires_at).getTime() <= Date.now();
+const isExpired = (l: ShortLink) =>
+  !!l.expires_at && new Date(l.expires_at).getTime() <= Date.now();
 
 function exportCsv(rows: ShortLink[], origin: string) {
-  const header = ["slug", "short_url", "destination", "enabled", "clicks", "created_at", "last_clicked_at", "expires_at"];
+  const header = [
+    "slug",
+    "short_url",
+    "destination",
+    "enabled",
+    "clicks",
+    "created_at",
+    "last_clicked_at",
+    "expires_at",
+  ];
   const esc = (v: string) => `"${v.replace(/"/g, '""')}"`;
   const lines = rows.map((l) =>
     [
@@ -331,9 +341,7 @@ function LinksPage() {
                           onClick={() => {
                             setExpiryId(settingExpiry ? null : l.id);
                             setExpiryValue(
-                              l.expires_at
-                                ? new Date(l.expires_at).toISOString().slice(0, 16)
-                                : "",
+                              l.expires_at ? new Date(l.expires_at).toISOString().slice(0, 16) : "",
                             );
                             setEditingId(null);
                           }}
@@ -392,7 +400,12 @@ function LinksPage() {
                           className="h-9 flex-1 border-hairline bg-surface-muted font-mono text-sm"
                         />
                         <div className="flex gap-2">
-                          <Button type="submit" variant="hero" size="sm" disabled={!editValue.trim()}>
+                          <Button
+                            type="submit"
+                            variant="hero"
+                            size="sm"
+                            disabled={!editValue.trim()}
+                          >
                             <Check className="size-3.5" /> Save
                           </Button>
                           <Button
@@ -412,9 +425,7 @@ function LinksPage() {
                         className="flex flex-col gap-2 sm:flex-row sm:items-center"
                         onSubmit={(e) => {
                           e.preventDefault();
-                          const iso = expiryValue
-                            ? new Date(expiryValue).toISOString()
-                            : null;
+                          const iso = expiryValue ? new Date(expiryValue).toISOString() : null;
                           setExpiry({ data: { id: l.id, expiresAt: iso, owner: owner! } })
                             .then(() => {
                               toast.success(iso ? "Expiry set" : "Expiry removed");
@@ -432,7 +443,8 @@ function LinksPage() {
                         />
                         <div className="flex gap-2">
                           <Button type="submit" variant="hero" size="sm">
-                            <Check className="size-3.5" /> {expiryValue ? "Set expiry" : "Remove expiry"}
+                            <Check className="size-3.5" />{" "}
+                            {expiryValue ? "Set expiry" : "Remove expiry"}
                           </Button>
                           <Button
                             type="button"

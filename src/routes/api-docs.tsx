@@ -20,14 +20,15 @@ export const Route = createFileRoute("/api-docs")({
       { property: "og:title", content: TITLE },
       { property: "og:description", content: DESCRIPTION },
       { property: "og:type", content: "website" },
+      { property: "og:url", content: "https://redirect-tracer-pro.lovable.app/api-docs" },
       { name: "twitter:card", content: "summary_large_image" },
     ],
+    links: [{ rel: "canonical", href: "https://redirect-tracer-pro.lovable.app/api-docs" }],
   }),
   component: ApiDocsPage,
 });
 
-const ENDPOINT =
-  "https://project--af61ac39-014c-4107-9369-28f94f73eb66.lovable.app/api/public/trace";
+const ENDPOINT = "https://redirect-tracer-pro.lovable.app/api/public/trace";
 
 const SNIPPETS: { id: string; label: string; code: string }[] = [
   {

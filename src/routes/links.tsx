@@ -46,8 +46,10 @@ export const Route = createFileRoute("/links")({
       { property: "og:title", content: TITLE },
       { property: "og:description", content: DESCRIPTION },
       { property: "og:type", content: "website" },
+      { property: "og:url", content: "https://redirect-tracer-pro.lovable.app/links" },
       { name: "twitter:card", content: "summary" },
     ],
+    links: [{ rel: "canonical", href: "https://redirect-tracer-pro.lovable.app/links" }],
   }),
   component: LinksPage,
 });

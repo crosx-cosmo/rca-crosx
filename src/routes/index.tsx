@@ -36,6 +36,22 @@ export const Route = createFileRoute("/")({
       { name: "twitter:card", content: "summary_large_image" },
     ],
     links: [{ rel: "canonical", href: "https://redirect-tracer-pro.lovable.app/" }],
+    scripts: [
+      {
+        type: "application/ld+json",
+        children: JSON.stringify({
+          "@context": "https://schema.org",
+          "@type": "WebApplication",
+          name: "Redirect Chain Analyzer",
+          url: "https://redirect-tracer-pro.lovable.app/",
+          description: DESCRIPTION,
+          applicationCategory: "DeveloperApplication",
+          operatingSystem: "Any",
+          offers: { "@type": "Offer", price: "0", priceCurrency: "USD" },
+          publisher: { "@type": "Organization", name: "CROSX" },
+        }),
+      },
+    ],
   }),
 
   component: AnalyzerPage,

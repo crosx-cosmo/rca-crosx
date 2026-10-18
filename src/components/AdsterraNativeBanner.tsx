@@ -1,12 +1,6 @@
 
 import { useEffect, useRef } from "react";
 
-const AD_SCRIPT_URL =
-  "https://bauval.org/21/5bbaef84e44d3e46b1a765f73f920228";
-
-const AD_CONTAINER_ID =
-  "container-5bbbaef84e44d3e46b1a765f73f920228";
-
 export function AdsterraNativeBanner() {
   const hostRef = useRef<HTMLDivElement>(null);
 
@@ -14,16 +8,16 @@ export function AdsterraNativeBanner() {
     const host = hostRef.current;
     if (!host) return;
 
-    const container = document.createElement("div");
-    container.id = AD_CONTAINER_ID;
-    container.style.width = "100%";
-    host.appendChild(container);
-
     const script = document.createElement("script");
     script.async = true;
     script.setAttribute("data-cfasync", "false");
-    script.src = AD_SCRIPT_URL;
+    script.src =
+      "https://bauval.org/21/5bbaef84e44d3e46b1a765f73f920228";
     host.appendChild(script);
+
+    const container = document.createElement("div");
+    container.id = "container-5bbbaef84e44d3e46b1a765f73f920228";
+    host.appendChild(container);
 
     return () => {
       script.remove();

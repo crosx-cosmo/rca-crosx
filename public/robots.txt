@@ -1,0 +1,7 @@
+User-agent: *
+Allow: /
+Disallow: /api/
+Disallow: /s/
+Disallow: /r/
+
+Sitemap: https://redirect-tracer-pro.lovable.app/sitemap.xml

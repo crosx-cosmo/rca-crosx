@@ -16,7 +16,7 @@ export function AdsterraNativeBanner() {
     host.appendChild(script);
 
     const container = document.createElement("div");
-    container.id = "container-5bbbaef84e44d3e46b1a765f73f920228";
+    container.id = "container-5bbaef84e44d3e46b1a765f73f920228";
     host.appendChild(container);
 
     return () => {

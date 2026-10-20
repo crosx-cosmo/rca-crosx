@@ -195,7 +195,7 @@ function AnalyzerPage() {
           timeout and a 55 s overall budget. Hops that cannot be safely followed are reported with
           the exact reason.
         </footer>
-        {/* <AdsterraNativeBanner /> */}
+        <AdsterraNativeBanner />
       </main>
     </div>
   );

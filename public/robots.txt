@@ -1,0 +1,63 @@
+User-agent: *
+Allow: /
+Allow: /links
+Allow: /api-docs
+Allow: /llms.txt
+Allow: /humans.txt
+Disallow: /api/
+Disallow: /s/
+Disallow: /r/
+
+User-agent: Googlebot
+Allow: /
+Allow: /links
+Allow: /api-docs
+Allow: /llms.txt
+Disallow: /api/
+Disallow: /s/
+Disallow: /r/
+
+User-agent: Bingbot
+Allow: /
+Allow: /links
+Allow: /api-docs
+Allow: /llms.txt
+Disallow: /api/
+Disallow: /s/
+Disallow: /r/
+
+User-agent: GPTBot
+Allow: /
+Allow: /links
+Allow: /api-docs
+Allow: /llms.txt
+Disallow: /api/
+Disallow: /s/
+
+User-agent: OAI-SearchBot
+Allow: /
+Allow: /links
+Allow: /api-docs
+Allow: /llms.txt
+Disallow: /api/
+Disallow: /s/
+
+User-agent: PerplexityBot
+Allow: /
+Allow: /links
+Allow: /api-docs
+Allow: /llms.txt
+Disallow: /api/
+Disallow: /s/
+
+User-agent: ClaudeBot
+Allow: /
+Allow: /links
+Allow: /api-docs
+Allow: /llms.txt
+Disallow: /api/
+Disallow: /s/
+
+Host: https://rca.crosx.in
+Sitemap: https://rca.crosx.in/sitemap.xml
+

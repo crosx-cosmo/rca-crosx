@@ -1,0 +1,6 @@
+{
+  "name": "Redirect Chain Analyzer — CROSX",
+  "description": "Trace any URL end to end: HTTP 301/302/307/308 redirects, meta refresh, JavaScript navigation, cloaked affiliate hops, loops, dead ends and tracking parameter loss.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

@@ -1,0 +1,10 @@
+/* TEAM */
+Organization: CROSX Advertising & Marketing Agency
+Product: Redirect Chain Analyzer — CROSX
+Site: https://rca.crosx.in
+API: https://rca.api.crosx.in/v1/trace
+
+/* SITE */
+Standards: HTML5, CSS3, ES2022, Schema.org JSON-LD, OpenGraph, Web App Manifest
+Stack: TanStack Start, TanStack Router, TanStack Query, React 19, Tailwind CSS v4, TypeScript
+Security: SSRF DNS-over-HTTPS IPv4/IPv6 Guard, HMAC-SHA256 Visitor Anonymization, Strict CSP

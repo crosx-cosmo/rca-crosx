@@ -1,0 +1,24 @@
+# Redirect Chain Analyzer — CROSX
+
+> Universal server-side URL redirect tracer, affiliate link unshortener, technical SEO hop auditor, transparent short link manager, and developer JSON API hosted at https://rca.crosx.in.
+
+## Overview
+Redirect Chain Analyzer by CROSX Advertising & Marketing Agency traces any URL end-to-end on the server across up to 20 hops. Unlike browser-only checkers, it follows:
+- HTTP status redirects (301 Moved Permanently, 302 Found, 303 See Other, 307 Temporary Redirect, 308 Permanent Redirect)
+- HTTP `Refresh` response headers
+- HTML `<meta http-equiv="refresh">` tags
+- Inline JavaScript navigation (`window.location`, `location.href`, `location.replace`, `location.assign`)
+- Script-gated navigation via an isolated headless-browser fallback
+
+## Core Capabilities
+- **User-Agent Simulation & Cloaking Detection**: Trace URLs as Desktop Chrome, Mobile iPhone (iOS), Mobile Android, Googlebot Smartphone, Googlebot Desktop, or Social Preview Bots.
+- **Technical SEO Audit**: Inspect final HTTP status, HTTPS protocol upgrades/downgrades, HSTS (`Strict-Transport-Security`), `Cache-Control`, `<link rel="canonical">` alignment against final URL, `<meta name="robots">`, and `X-Robots-Tag` headers.
+- **Affiliate & UTM Tracking Forensics**: Diff query parameters across every hop (`utm_source`, `utm_medium`, `utm_campaign`, `utm_term`, `utm_content`, `gclid`, `fbclid`, `msclkid`, `click_id`, `aff_id`, `sub1`–`sub10`) and generate clean tracking-free destination URLs.
+- **Bulk URL Analysis**: Trace up to 20 URLs per batch and export results to JSON, CSV, or plain-text reports.
+- **Transparent Short Links (`/links`)**: Create SSRF-validated short URLs (`https://rca.crosx.in/s/{slug}`) with custom slugs, downloadable SVG/PNG QR codes, link expiration, conditional smart redirect rules (country, device, OS, browser, UTM/query, UTC schedule), bulk CSV import/export, and privacy-first HMAC visitor analytics.
+
+## Public Pages & Endpoints
+- [Redirect Chain Analyzer](https://rca.crosx.in/): Main interactive redirect tracer, bulk URL auditor, and SEO/tracking inspector. Supports deep linking via `https://rca.crosx.in/?url=https://example.com`.
+- [Short Links Manager](https://rca.crosx.in/links): Transparent short link creator with smart routing rules, QR codes, and click analytics.
+- [Chain Tracer Developer API Docs](https://rca.crosx.in/api-docs): Documentation and live playground for the JSON redirect tracing API (`POST https://rca.api.crosx.in/v1/trace` and `/api/public/trace`).
+- [Sitemap](https://rca.crosx.in/sitemap.xml): XML sitemap with `hreflang` annotations.
